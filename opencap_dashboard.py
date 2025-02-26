@@ -223,13 +223,13 @@ fig.add_trace(go.Scatter(
 fig.add_trace(go.Scatter(
     y = treadmill_force[f'{plate}:FX'],
     x = treadmill_force['Time (s)'], 
-    name = 'Horizontal Force'
+    name = 'Lateral Force'
 
 ))
 fig.add_trace(go.Scatter(
     y = treadmill_force[f'{plate}:FY'],
     x = treadmill_force['Time (s)'], 
-    name = 'Lateral Force'
+    name = 'Horizontal Force'
 
 ))
 
