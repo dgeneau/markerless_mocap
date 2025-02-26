@@ -1,0 +1,15 @@
+casadi==3.6.7
+joblib==1.1.1
+maskpass==0.3.7
+matplotlib==3.8.4
+numpy==1.23.5
+opensim==3.3
+pandas==1.5.3
+plotly==5.9.0
+python-decouple==3.8
+PyYAML==6.0
+PyYAML==6.0.2
+Requests==2.32.3
+scipy==1.10.0
+seaborn==0.13.2
+streamlit==1.20.0
