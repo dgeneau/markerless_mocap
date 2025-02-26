@@ -108,7 +108,7 @@ elif trial == 'Running 5.5 m/s':
     filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
     filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
 
-    treadmill_vel = 3.6
+    treadmill_vel = 5.5
     plate = 1
     
 
