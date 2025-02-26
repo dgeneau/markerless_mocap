@@ -304,8 +304,8 @@ with col2:
 
 with col3:
     st.header('Peak Force')
-    st.metric('Average Stride Length Left', PF_left)
-    st.metric('Average Stride Length Right', PF_right)
+    st.metric('Average Force Peak Left', PF_left)
+    st.metric('Average Force Peak Right', PF_right)
     st.metric('Asymetry',round(PF_left/PF_right*100, 2))
 
 #st.plotly_chart(stride_fig)
