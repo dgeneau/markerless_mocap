@@ -315,7 +315,7 @@ with col3:
     st.metric('Asymetry',round(PF_left/PF_right*100, 2))
 
 with col4:
-    st.header('Peak Force')
+    st.header('Stride Impulse')
     st.metric('Average Impulse Left', imp_left)
     st.metric('Average Impulse Right', imp_right)
     st.metric('Asymetry',round(imp_left/imp_right*100,2))
