@@ -9,6 +9,7 @@ import numpy as np
 import plotly.graph_objects as go
 import scipy as sp
 from scipy.signal import find_peaks
+from scipy import integrate
 
 
 def read_mot_file(filepath):
@@ -188,10 +189,13 @@ finding the 'middle' of the force plate to differenciate left and right COP valu
 treadmill_force[f'{plate}:COPX'] = treadmill_force[f'{plate}:COPX'] + 0.26
 
 cop_means = []
+impulses = []
 
 for i in range(0, len(stride_start)): 
     mean = np.mean(treadmill_force[f'{plate}:COPX'][stride_start[i]:stride_end[i]])
+    impulse = integrate.cumulative_trapezoid(treadmill_force[f'{plate}:FZ'][stride_start[i]:stride_end[i]], (treadmill_force['Time (s)'][stride_start[i]:stride_end[i]] - treadmill_force['Time (s)'][stride_start[i]]), initial = 0)[-1]
     cop_means.append(mean)
+    impulses.append(impulse)
 
 side_list = []
 for val in cop_means:
@@ -205,7 +209,7 @@ elif side_list[0] == 'R':
     stride_metrics['foot_side'] = ['R' if i % 2 == 0 else 'L' for i in stride_metrics.index]
 
 
-
+stride_metrics['impulse'] = impulses
 
 
 fig = go.Figure()
@@ -277,7 +281,7 @@ stride_fig.update_layout(xaxis_title = '<b>Stride Number</b>')
 stride_fig.update_layout(yaxis_title = '<b>Stride Length</b> (m)')
 stride_fig.update_layout(title = '<b>Stride Length Plot</b>')
 
-col1,col2,col3 = st.columns([2,2,2])
+col1,col2,col3, col4 = st.columns([2,2,2,2])
 
 
 SL_left = round(np.mean(stride_metrics['length'][stride_metrics['foot_side'] == 'L'][2:-2]),3)
@@ -286,9 +290,11 @@ SL_right = round(np.mean(stride_metrics['length'][stride_metrics['foot_side'] ==
 ST_left = round(np.mean(stride_metrics['stride_time'][stride_metrics['foot_side'] == 'L'][2:-2]),3)
 ST_right = round(np.mean(stride_metrics['stride_time'][stride_metrics['foot_side'] == 'R'][2:-2]),3)
 
-PF_left = round(np.mean(stride_metrics['force_peak'][stride_metrics['foot_side'] == 'L'][2:-2]),3)
-PF_right = round(np.mean(stride_metrics['force_peak'][stride_metrics['foot_side'] == 'R'][2:-2]),3)
+PF_left = round(np.mean(stride_metrics['force_peak'][stride_metrics['foot_side'] == 'L'][2:-2]),1)
+PF_right = round(np.mean(stride_metrics['force_peak'][stride_metrics['foot_side'] == 'R'][2:-2]),1)
 
+imp_left = round(np.mean(stride_metrics['impulse'][stride_metrics['foot_side'] == 'L'][2:-2]),2)
+imp_right = round(np.mean(stride_metrics['impulse'][stride_metrics['foot_side'] == 'R'][2:-2]),2)
 
 with col1:
     st.header('Stride Time')
@@ -307,6 +313,13 @@ with col3:
     st.metric('Average Force Peak Left', PF_left)
     st.metric('Average Force Peak Right', PF_right)
     st.metric('Asymetry',round(PF_left/PF_right*100, 2))
+
+with col4:
+    st.header('Peak Force')
+    st.metric('Average Impulse Left', imp_left)
+    st.metric('Average Impulse Right', imp_right)
+    st.metric('Asymetry',round(imp_left/imp_right*100,2))
+
 
 #st.plotly_chart(stride_fig)
 
@@ -372,3 +385,6 @@ if left_info == True:
 
 
 st.plotly_chart(joint_fig)
+
+if len(joints) ==2: 
+    st.metric('Kinematic Asymmetry', round(df_kin[f'{joints[0]}'].mean()/df_kin[f'{joints[1]}'].mean()*100, 2))
