@@ -84,6 +84,21 @@ def read_and_adjust_trc(filepath):
 
     return df
 
+def summarize_options(options):
+
+    summarized_list = []
+    seen_bases = set()
+
+    for opt in options:
+        # Only process options that end with '_l' or '_r'
+        if opt.endswith('_l') or opt.endswith('_r'):
+            base_opt = opt[:-2]  # remove last two characters
+            if base_opt not in seen_bases:
+                seen_bases.add(base_opt)
+                summarized_list.append(base_opt)
+
+    return summarized_list
+
 
 _='Begin Dashboarding'
 st.set_page_config(layout="wide")
@@ -98,7 +113,7 @@ if trial == 'Running 3.6 m/s':
     filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
     filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
     filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
-
+    start = 0
     treadmill_vel = 3.6
     plate = 1
     
@@ -107,13 +122,15 @@ elif trial == 'Running 5.5 m/s':
     filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
     filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
     filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
-
+    start = 120*3
     treadmill_vel = 5.5
     plate = 1
     
 
 df_marker = read_and_adjust_trc(filepath_marker)
+df_marker = df_marker[start:].reset_index(drop=True)
 df_kin = read_mot_file(filepath_kin)
+df_kin = df_kin[start:].reset_index(drop=True)
 treadmill_force = pd.read_csv(filepath_FP, skiprows=4)
 
 def detect_strides(force):
@@ -199,9 +216,11 @@ for i in range(0, len(stride_start)):
 
 side_list = []
 for val in cop_means:
-    if val >0 : side_list.append('R')
-    elif val<0 : side_list.append('L')
+    if val > 0 : side_list.append('R')
+    elif val < 0 : side_list.append('L')
     else: side_list.append('UK')
+
+
 
 if side_list[0] == 'L':
     stride_metrics['foot_side'] = ['L' if i % 2 == 0 else 'R' for i in stride_metrics.index]
@@ -210,6 +229,8 @@ elif side_list[0] == 'R':
 
 
 stride_metrics['impulse'] = impulses
+stride_metrics['start'] = stride_start
+stride_metrics['end'] = stride_end
 
 
 fig = go.Figure()
@@ -263,7 +284,116 @@ fig.update_layout(xaxis_title = '<b>Time</b> (s)')
 fig.update_layout(yaxis_title = '<b>Force</b> (N)')
 fig.update_layout(title = '<b>Force Time Trace</b>')
 
-st.plotly_chart(fig)
+_='''
+Average Force Trace for each step
+'''
+force_trace = go.Figure()
+
+
+
+all_force_r = []
+all_force_l = []
+
+stride_starts_r = stride_metrics['start'][stride_metrics['foot_side'] == 'R'].reset_index(drop=True)
+stride_ends_r = stride_metrics['end'][stride_metrics['foot_side'] == 'R'].reset_index(drop=True)
+
+stride_starts_l = stride_metrics['start'][stride_metrics['foot_side'] == 'L'].reset_index(drop=True)
+stride_ends_l = stride_metrics['end'][stride_metrics['foot_side'] == 'L'].reset_index(drop=True)
+
+
+# ----- RIGHT SIDE -----
+for i in range(0,len(stride_starts_r)):
+    # Extract the stride for this segment
+    stride_f_r = treadmill_force[f'{plate}:FZ'][stride_starts_r[i]:stride_ends_r[i]].reset_index(drop=True)
+    
+    # Plot individual stride
+    force_trace.add_trace(go.Scatter(
+        y=stride_f_r,
+        line=dict(color='red'),
+        opacity = .05,
+    ))
+    
+    # Save this stride's numeric values for later averaging
+    all_force_r.append(stride_f_r.values)
+
+# Once we have all right-side strides, we can pad them with NaNs and compute an average
+if all_force_r:
+    # Determine the maximum stride length
+    max_len_r = max(len(arr) for arr in all_force_r)
+
+    # Pad each stride to max_len_r
+    padded_force_r = []
+    for arr in all_force_r:
+        # Calculate how many NaNs we need
+        pad_len = max_len_r - len(arr)
+        # Pad at the end with NaN
+        padded_arr = np.pad(arr, (0, pad_len), mode='constant', constant_values=np.nan)
+        padded_force_r.append(padded_arr)
+
+    # Convert to an array of shape (num_strides, max_stride_len)
+    padded_force_r = np.array(padded_force_r)  
+
+    # Compute average ignoring NaNs
+    avg_stride_r = np.nanmean(padded_force_r, axis=0)
+
+    # Plot the average stride
+    force_trace.add_trace(go.Scatter(
+        y=avg_stride_r,
+        line=dict(color='red', width=5),  # thicker line
+    ))
+
+# ----- LEFT SIDE -----
+
+all_force_l = []
+
+for i in range(0,len(stride_starts_l)):
+    # Extract the stride
+    stride_f_l = treadmill_force[f'{plate}:FZ'][stride_starts_l[i]:stride_ends_l[i]].reset_index(drop=True)
+      
+    # Plot individual stride
+    force_trace.add_trace(go.Scatter(
+        y=stride_f_l,
+        line=dict(color='green'),
+        opacity = .05,
+    ))
+    
+    # Save stride in list
+    all_force_l .append(stride_f_l.values)
+
+# Pad with NaNs and average, if we have left strides
+if all_force_l:
+    # Determine the maximum stride length
+    max_len_l = max(len(arr) for arr in all_force_l)
+
+    # Pad each stride to max_len_l
+    padded_force_l = []
+    for arr in all_force_l:
+        pad_len = max_len_l - len(arr)
+        padded_arr = np.pad(arr, (0, pad_len), mode='constant', constant_values=np.nan)
+        padded_force_l.append(padded_arr)
+
+    # Convert to array
+    padded_force_l = np.array(padded_force_l)
+
+    # Compute average ignoring NaNs
+    avg_force_l = np.nanmean(padded_force_l, axis=0)
+
+    # Plot the average stride
+    force_trace.add_trace(go.Scatter(
+        y=avg_force_l,
+        line=dict(color='green', width=5),
+    ))
+
+force_trace.update_layout(xaxis_title = '<b>Sample Number</b>')
+force_trace.update_layout(yaxis_title = '<b>Force</b> (N)')
+force_trace.update_layout(title = '<b>Foot Contact Force Trace</b>')
+force_trace.update_traces(showlegend=False) 
+
+temp_force, avg_force = st.columns([5,2])
+with temp_force:
+    st.plotly_chart(fig)
+with avg_force:
+    st.plotly_chart(force_trace)
 
 # Add the bar trace
 stride_fig = go.Figure()
@@ -364,12 +494,137 @@ Model Kinematics Info
 
 st.header('Model Kinematics')
 
-joints = st.multiselect('Select Kinematics to Plot', df_kin.columns)
+
+joint_list = summarize_options(list(df_kin.columns))
+
+joints = st.multiselect('Select Kinematics to Plot', joint_list)
+
+
+
+avg_fig = go.Figure()
+avg_fig = go.Figure()
+show_left = st.checkbox('Average Left Kinematics')
+show_right = st.checkbox('Average Right Kinematics')
+
+for kin in joints:
+    # ----- RIGHT SIDE -----
+    if show_right:
+        all_strides_r = []
+
+        for i in range(len(right_SO) - 1):
+            # Extract the stride for this segment
+            stride_kin_r = df_kin[f'{kin}_r'][right_SO[i]:right_SO[i+1]].reset_index(drop=True)
+            
+            # Plot individual stride
+            avg_fig.add_trace(go.Scatter(
+                y=stride_kin_r,
+                line=dict(color='red'),
+                opacity = .05,
+                name=f'{kin}_r_stride{i}'   # optional
+            ))
+            
+            # Save this stride's numeric values for later averaging
+            all_strides_r.append(stride_kin_r.values)
+
+        # Once we have all right-side strides, we can pad them with NaNs and compute an average
+        if all_strides_r:
+            # Determine the maximum stride length
+            max_len_r = max(len(arr) for arr in all_strides_r)
+
+            # Pad each stride to max_len_r
+            padded_r = []
+            for arr in all_strides_r:
+                # Calculate how many NaNs we need
+                pad_len = max_len_r - len(arr)
+                # Pad at the end with NaN
+                padded_arr = np.pad(arr, (0, pad_len), mode='constant', constant_values=np.nan)
+                padded_r.append(padded_arr)
+
+            # Convert to an array of shape (num_strides, max_stride_len)
+            padded_r = np.array(padded_r)  
+
+            # Compute average ignoring NaNs
+            avg_stride_r = np.nanmean(padded_r, axis=0)
+
+            # Plot the average stride
+            avg_fig.add_trace(go.Scatter(
+                y=avg_stride_r,
+                line=dict(color='red', width=5),  # thicker line
+                name=f'{kin}_r_average'
+            ))
+
+    # ----- LEFT SIDE -----
+    if show_left:
+        all_strides_l = []
+
+        for i in range(len(left_SO) - 1):
+            # Extract the stride
+            stride_kin_l = df_kin[f'{kin}_l'][left_SO[i]:left_SO[i+1]].reset_index(drop=True)
+            
+            # Plot individual stride
+            avg_fig.add_trace(go.Scatter(
+                y=stride_kin_l,
+                line=dict(color='green'),
+                opacity = .05,
+                name=f'{kin}_l_stride{i}'
+            ))
+            
+            # Save stride in list
+            all_strides_l.append(stride_kin_l.values)
+
+        # Pad with NaNs and average, if we have left strides
+        if all_strides_l:
+            # Determine the maximum stride length
+            max_len_l = max(len(arr) for arr in all_strides_l)
+
+            # Pad each stride to max_len_l
+            padded_l = []
+            for arr in all_strides_l:
+                pad_len = max_len_l - len(arr)
+                padded_arr = np.pad(arr, (0, pad_len), mode='constant', constant_values=np.nan)
+                padded_l.append(padded_arr)
+
+            # Convert to array
+            padded_l = np.array(padded_l)
+
+            # Compute average ignoring NaNs
+            avg_stride_l = np.nanmean(padded_l, axis=0)
+
+            # Plot the average stride
+            avg_fig.add_trace(go.Scatter(
+                y=avg_stride_l,
+                line=dict(color='green', width=5),
+                name=f'{kin}_l_average'
+            ))
+
+avg_fig.update_layout(xaxis_title = '<b>Sample Number</b>')
+avg_fig.update_layout(yaxis_title = '<b>Speed</b>')
+avg_fig.update_layout(title = '<b>Stride Kinematics Comparison</b>')
+avg_fig.update_traces(showlegend=False) 
+
+st.plotly_chart(avg_fig)
+avg_l, std_l, avg_r, std_r = st.columns(4)
+if show_left and show_right:
+    with avg_l:
+        st.metric('Average Left', round(np.mean(avg_stride_l), 2))
+    with std_l:
+        st.metric('Standard Dev Left', round(np.std(avg_stride_l), 2))
+    with avg_r:
+        st.metric('Average Right', round(np.mean(avg_stride_r), 2))
+    with std_r:
+        st.metric('Standard Dev Right', round(np.std(avg_stride_r), 2))
+
 
 joint_fig = go.Figure()
 for joint in joints:
     joint_fig.add_trace(go.Scatter(
-        y = df_kin[f'{joint}'],
+        y = df_kin[f'{joint}_l'],
+        x = df_kin['time'], 
+        name = f'{joint}'
+
+    ))
+    joint_fig.add_trace(go.Scatter(
+        y = df_kin[f'{joint}_r'],
         x = df_kin['time'], 
         name = f'{joint}'
 
@@ -383,8 +638,8 @@ if left_info == True:
     for l_stride in left_SO:
         joint_fig.add_vline(df_kin['time'][l_stride], line_color = 'green', name = 'Left Stride')
 
+temporal_kin = st.sidebar.checkbox('Show Temporal Kinematics')
+if temporal_kin == True:
+    st.plotly_chart(joint_fig)
 
-st.plotly_chart(joint_fig)
 
-if len(joints) ==2: 
-    st.metric('Kinematic Asymmetry', round(df_kin[f'{joints[0]}'].mean()/df_kin[f'{joints[1]}'].mean()*100, 2))
