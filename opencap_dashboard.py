@@ -113,6 +113,7 @@ if trial == 'Running 3.6 m/s':
     filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
     filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
     filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
+    video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
     start = 0
     treadmill_vel = 3.6
     plate = 1
@@ -122,6 +123,7 @@ elif trial == 'Running 5.5 m/s':
     filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
     filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
     filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
+    video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
     start = 120*3
     treadmill_vel = 5.5
     plate = 1
@@ -606,7 +608,19 @@ avg_fig.update_layout(yaxis_title = '<b>Speed</b>')
 avg_fig.update_layout(title = '<b>Stride Kinematics Comparison</b>')
 avg_fig.update_traces(showlegend=False) 
 
-st.plotly_chart(avg_fig)
+plot, video_box = st.columns([7,1.2])
+with plot: 
+    st.plotly_chart(avg_fig)
+
+
+video_file = open(video, "rb")
+video_bytes = video_file.read()
+
+
+with video_box:
+    st.video(video_bytes)
+
+
 avg_l, std_l, avg_r, std_r = st.columns(4)
 if show_left and show_right:
     with avg_l:
@@ -645,5 +659,4 @@ if left_info == True:
 temporal_kin = st.sidebar.checkbox('Show Temporal Kinematics')
 if temporal_kin == True:
     st.plotly_chart(joint_fig)
-
 
