@@ -456,16 +456,19 @@ with col4:
 
 _='''
 Stride Segmentation using Markers
+
 '''
 
 right_SO,_ = find_peaks(df_marker['RBigToe']*-1, distance=50)
 left_SO,_ = find_peaks(df_marker['LBigToe']*-1, distance =50)
 
+_=''''
 st.header('Marker Data')
 
 markers = st.multiselect('Select Markers to Plot', df_marker.columns)
-
+'''
 marker_fig = go.Figure()
+_='''
 for marker in markers:
     marker_fig.add_trace(go.Scatter(
         y = df_marker[f'{marker}'],
@@ -473,6 +476,7 @@ for marker in markers:
         name = f'{marker}'
 
     ))
+'''
 left_info = st.sidebar.checkbox('Show Left Stride')
 right_info = st.sidebar.checkbox('Show Right Stride')
 
@@ -484,7 +488,7 @@ if left_info == True:
     for l_stride in left_SO:
         marker_fig.add_vline(df_marker['Time'][l_stride], line_color = 'green', name = 'Left Stride')
 
-st.plotly_chart(marker_fig)
+#st.plotly_chart(marker_fig)
 
 
 _='''
