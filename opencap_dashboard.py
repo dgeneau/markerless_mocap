@@ -148,7 +148,7 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_0.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_0.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174246.csv'
-        video = f'Collection Feb 28/Session_1/{session_id}/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
+        video = f'Collection Feb 28/Session_1/{session_id}/Videos/InputMedia/run_5_5/run_5_0_sync.mp4'
         start = 0
         treadmill_vel = 5.0
         plate = 1
