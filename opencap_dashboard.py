@@ -107,27 +107,63 @@ st.set_page_config(layout="wide")
 st.image('https://www.csipacific.ca/wp-content/uploads/2023/10/logo-Performance-Nation-vertical-lg.png', width = 150)
 st.title("Biomechanical Running Analysis")
 
-trial  = st.sidebar.selectbox('Select Trial', ['Running 3.6 m/s', 'Running 5.5 m/s'])
+session_date = st.sidebar.selectbox('Select Date', ['Feb 21', 'Feb 28'])
 
-if trial == 'Running 3.6 m/s': 
-    filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
-    filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
-    filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
-    video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
-    start = 0
-    treadmill_vel = 3.6
-    plate = 1
-    
+if session_date == 'Feb 21':
+    trial  = st.sidebar.selectbox('Select Trial', ['Running 3.6 m/s', 'Running 5.5 m/s'])
 
-elif trial == 'Running 5.5 m/s': 
-    filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
-    filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
-    filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
-    video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
-    start = 120*3
-    treadmill_vel = 5.5
-    plate = 1
-    
+    if trial == 'Running 3.6 m/s': 
+        filepath_marker = f'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
+        filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
+        filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+        
+
+    elif trial == 'Running 5.5 m/s': 
+        filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
+        filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
+        filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
+        start = 120*3
+        treadmill_vel = 5.5
+        plate = 1
+        
+elif session_date == 'Feb 28': 
+    trial  = st.sidebar.selectbox('Select Trial', ['Running 3.6 m/s', 'Running 5.0 m/s','Running 5.5 m/s'])
+    session_id = 'OpenCapData_65d2792a-163c-4f5c-818f-c9374e99940b'
+
+    if trial == 'Running 3.6 m/s': 
+        filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_3_6_2.trc'
+        filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_3_6_2.mot'
+        filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174729.csv'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_3_6_2/run_3_6_2_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+
+    elif trial == 'Running 5.0 m/s': 
+        filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_0.trc'
+        filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_0.mot'
+        filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174246.csv'
+        video = f'Collection Feb 28/Session_1/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
+        start = 0
+        treadmill_vel = 5.0
+        plate = 1
+
+
+    elif trial == 'Running 5.5 m/s': 
+        filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_5.trc'
+        filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_5.mot'
+        filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174841.csv'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
+        start = 0
+        treadmill_vel = 5.5
+        plate = 1
+
+
 
 df_marker = read_and_adjust_trc(filepath_marker)
 df_marker = df_marker[start:].reset_index(drop=True)
@@ -137,7 +173,7 @@ treadmill_force = pd.read_csv(filepath_FP, skiprows=4)
 
 def detect_strides(force):
         
-    force_peaks,_ = find_peaks(force, height = 700, distance = 90)
+    force_peaks,_ = find_peaks(force, height = 755, distance = 90)
  
 
     stride_start = []
