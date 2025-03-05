@@ -116,7 +116,7 @@ if session_date == 'Feb 21':
         filepath_marker = f'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
         filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
         filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
-        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
         start = 0
         treadmill_vel = 3.6
         plate = 1
@@ -126,7 +126,7 @@ if session_date == 'Feb 21':
         filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
         filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
         filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
-        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
         start = 120*3
         treadmill_vel = 5.5
         plate = 1
@@ -139,7 +139,7 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_3_6_2.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_3_6_2.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174729.csv'
-        video = f'Collection {session_date}/Session_1/{session_id}/Videos/InputMedia/run_3_6_2/run_3_6_2_sync.mp4'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_3_6_2/run_3_6_2_sync.mp4'
         start = 0
         treadmill_vel = 3.6
         plate = 1
@@ -148,7 +148,7 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_0.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_0.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174246.csv'
-        video = f'Collection Feb 28/Session_1/{session_id}/Videos/InputMedia/run_5_5/run_5_0_sync.mp4'
+        video = f'Collection Feb 28/Session_1/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
         start = 0
         treadmill_vel = 5.0
         plate = 1
@@ -158,7 +158,7 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_5.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_5.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174841.csv'
-        video = f'Collection {session_date}/Session_1/{session_id}/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
         start = 0
         treadmill_vel = 5.5
         plate = 1
@@ -215,6 +215,12 @@ treadmill_force[f'{plate}:FX'] = lowpass(treadmill_force[f'{plate}:FX'],50,1000)
 
 stride_onset = np.where(treadmill_force[f'{plate}:FZ']<0)[0][0]
 treadmill_force = treadmill_force.iloc[stride_onset:,:].reset_index(drop=True)
+
+start, end = st.slider("Select a range of values", 0, len(treadmill_force), (0, len(treadmill_force)))
+treadmill_force = treadmill_force[start:end].reset_index(drop=True)
+
+
+treadmill_force = treadmill_force 
 
 stride_start, stride_end, force_peaks = detect_strides(treadmill_force[f'{plate}:FZ'])
 
@@ -497,6 +503,10 @@ Stride Segmentation using Markers
 
 '''
 
+kin_start, kin_end = st.slider("Select a range of values", 0, len(df_kin), (0, len(df_kin)))
+df_kin = df_kin[kin_start:kin_end].reset_index(drop=True)
+df_marker = df_marker[kin_start:kin_end].reset_index(drop=True)
+
 right_SO,_ = find_peaks(df_marker['RBigToe']*-1, distance=50)
 left_SO,_ = find_peaks(df_marker['LBigToe']*-1, distance =50)
 
@@ -540,6 +550,32 @@ st.header('Model Kinematics')
 joint_list = summarize_options(list(df_kin.columns))
 
 joints = st.multiselect('Select Kinematics to Plot', joint_list)
+
+
+joint_fig = go.Figure()
+for joint in joints:
+    joint_fig.add_trace(go.Scatter(
+        y = df_kin[f'{joint}_l'],
+        x = df_kin['time'], 
+        name = f'{joint}'
+
+    ))
+    joint_fig.add_trace(go.Scatter(
+        y = df_kin[f'{joint}_r'],
+        x = df_kin['time'], 
+        name = f'{joint}'
+
+    ))
+
+if right_info == True:
+    for r_stride in right_SO:
+        joint_fig.add_vline(df_kin['time'][r_stride], line_color = 'red', name = 'Right Stride')
+
+if left_info == True:
+    for l_stride in left_SO:
+        joint_fig.add_vline(df_kin['time'][l_stride], line_color = 'green', name = 'Left Stride')
+
+st.plotly_chart(joint_fig)
 
 
 
@@ -667,32 +703,4 @@ if show_left and show_right:
         st.metric('Average Right', round(np.mean(avg_stride_r), 2))
     with std_r:
         st.metric('Standard Dev Right', round(np.std(avg_stride_r), 2))
-
-
-joint_fig = go.Figure()
-for joint in joints:
-    joint_fig.add_trace(go.Scatter(
-        y = df_kin[f'{joint}_l'],
-        x = df_kin['time'], 
-        name = f'{joint}'
-
-    ))
-    joint_fig.add_trace(go.Scatter(
-        y = df_kin[f'{joint}_r'],
-        x = df_kin['time'], 
-        name = f'{joint}'
-
-    ))
-
-if right_info == True:
-    for r_stride in right_SO:
-        joint_fig.add_vline(df_kin['time'][r_stride], line_color = 'red', name = 'Right Stride')
-
-if left_info == True:
-    for l_stride in left_SO:
-        joint_fig.add_vline(df_kin['time'][l_stride], line_color = 'green', name = 'Left Stride')
-
-temporal_kin = st.sidebar.checkbox('Show Temporal Kinematics')
-if temporal_kin == True:
-    st.plotly_chart(joint_fig)
 
