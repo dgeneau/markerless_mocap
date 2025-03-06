@@ -245,7 +245,7 @@ crop_fig.update_layout(dragmode="select")
 crop_fig.update_layout(xaxis_title = '<b>Time</b> (s)')
 crop_fig.update_layout(yaxis_title = '<b>Force</b> (N)')
 crop_fig.update_layout(title = '<b>Data Selector</b>')
-
+st.plotly_chart(crop_fig)
 
 # 3) Render the figure in Streamlit and capture user selection
 #    - Box/Lasso selection is turned on by default in the Plotly figure toolbar.
