@@ -12,6 +12,8 @@ from scipy.signal import find_peaks
 from scipy import integrate
 from streamlit_plotly_events import plotly_events
 
+import plotly.express as px
+
 
 def read_mot_file(filepath):
     """
@@ -107,7 +109,7 @@ st.set_page_config(layout="wide")
 
 st.image('https://www.csipacific.ca/wp-content/uploads/2023/10/logo-Performance-Nation-vertical-lg.png', width = 150)
 st.title("Biomechanical Running Analysis")
-st.write('Changes made')
+
 
 session_date = st.sidebar.selectbox('Select Date', ['Feb 21', 'Feb 28', 'March 7'])
 
@@ -292,6 +294,8 @@ Working on Brushing the data using matplot lib
 '''
 
 df_downsampled = treadmill_force.iloc[::10].reset_index(drop=True)
+
+_='''
 crop_fig = go.Figure()
 crop_fig.add_scatter(
     x=np.array(df_downsampled["Time (s)"]),
@@ -306,6 +310,26 @@ crop_fig.update_layout(dragmode="select")
 crop_fig.update_layout(xaxis_title = '<b>Time</b> (s)')
 crop_fig.update_layout(yaxis_title = '<b>Force</b> (N)')
 crop_fig.update_layout(title = '<b>Data Selector</b>')
+'''
+crop_fig = px.line(
+    df_downsampled,
+    x="Time (s)",
+    y="1:FZ",
+    title="<b>Data Selector</b>",
+    labels={
+        "Time (s)": "<b>Time</b> (s)",
+        "1:FZ": "<b>Force</b> (N)"
+    },
+    markers=True  # shows markers in addition to lines
+)
+
+# Make marker size smaller (equivalent to marker=dict(size=1))
+crop_fig.update_traces(marker=dict(size=1))
+
+# Set default drag mode to "select"
+crop_fig.update_layout(dragmode="select")
+
+
 
 
 # 3) Render the figure in Streamlit and capture user selection
