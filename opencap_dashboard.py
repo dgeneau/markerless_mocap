@@ -10,6 +10,7 @@ import plotly.graph_objects as go
 import scipy as sp
 from scipy.signal import find_peaks
 from scipy import integrate
+from streamlit_plotly_events import plotly_events
 
 
 def read_mot_file(filepath):
@@ -107,7 +108,7 @@ st.set_page_config(layout="wide")
 st.image('https://www.csipacific.ca/wp-content/uploads/2023/10/logo-Performance-Nation-vertical-lg.png', width = 150)
 st.title("Biomechanical Running Analysis")
 
-session_date = st.sidebar.selectbox('Select Date', ['Feb 21', 'Feb 28'])
+session_date = st.sidebar.selectbox('Select Date', ['Feb 21', 'Feb 28', 'March 7'])
 
 if session_date == 'Feb 21':
     trial  = st.sidebar.selectbox('Select Trial', ['Running 3.6 m/s', 'Running 5.5 m/s'])
@@ -116,7 +117,7 @@ if session_date == 'Feb 21':
         filepath_marker = f'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_3_6_1.trc'
         filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_3_6_1.mot'
         filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164149.csv'
-        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
         start = 0
         treadmill_vel = 3.6
         plate = 1
@@ -126,7 +127,7 @@ if session_date == 'Feb 21':
         filepath_marker = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/MarkerData/run_5_5.trc'
         filepath_kin = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/OpenSimData/Kinematics/run_5_5.mot'
         filepath_FP = 'Collection Feb 21/Session_1/Session_1_forces_2025_02_21_164402.csv'
-        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
+        video = 'Collection Feb 21/Session_1/OpenCapData_d779ad48-7221-41ca-a68e-6728b177a6fb/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
         start = 120*3
         treadmill_vel = 5.5
         plate = 1
@@ -139,7 +140,7 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_3_6_2.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_3_6_2.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174729.csv'
-        video = f'Collection {session_date}/Session_1/{session_id}/Videos/InputMedia/run_3_6_2/run_3_6_2_sync.mp4'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_3_6_2/run_3_6_2_sync.mp4'
         start = 0
         treadmill_vel = 3.6
         plate = 1
@@ -158,12 +159,77 @@ elif session_date == 'Feb 28':
         filepath_marker = f'Collection {session_date}/Session_1/{session_id}/MarkerData/run_5_5.trc'
         filepath_kin = f'Collection {session_date}/Session_1/{session_id}/OpenSimData/Kinematics/run_5_5.mot'
         filepath_FP = f'Collection {session_date}/Session_1/Session_1_forces_2025_02_28_174841.csv'
-        video = f'Collection {session_date}/Session_1/{session_id}/Videos/InputMedia/run_5_5/run_5_5_sync.mp4'
+        video = f'Collection {session_date}/Session_1/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
         start = 0
         treadmill_vel = 5.5
         plate = 1
 
+elif session_date == 'March 7': 
+    trial  = st.sidebar.selectbox('Select Trial', ['Running 3.6 m/s','Running 3.6 m/s, 3 Que', 'Running 3.6 m/s, Toes', 'Running 3.6 m/s, Ring Pits','Running 5.5 m/s', 'Running 5.5 m/s, 3 Que', 'Running 5.5 m/s, Ring Pits'])
+    session_id = 'OpenCapData_8c309990-af14-4186-8d6f-29e5ad3fa95e'
 
+    if trial == 'Running 3.6 m/s': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_3_6_1.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_3_6_1.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_174950.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_3_6_1/run_3_6_1_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+    
+    elif trial == 'Running 3.6 m/s, 3 Que': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_3_6_3Que.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_3_6_3Que.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_180208.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_3_6_3Que/run_3_6_3Que_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+
+    elif trial == 'Running 3.6 m/s, Toes': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_3_6bendtoes_2.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_3_6bendtoes_2.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_180029.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_3_6bendtoes_2/run_3_6bendtoes_2_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+
+    elif trial == 'Running 3.6 m/s, Ring Pits': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_3_6ringpits.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_3_6ringpits.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_175502.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_3_6ringpits/run_3_6ringpits_sync.mp4'
+        start = 0
+        treadmill_vel = 3.6
+        plate = 1
+
+    elif trial == 'Running 5.5 m/s': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_5_5.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_5_5.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_175042.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_5_5/run_5_5_sync.mp4'
+        start = 0
+        treadmill_vel = 5.5
+        plate = 1
+    
+    elif trial == 'Running 5.5 m/s, 3 Que': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_5_5_3que.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_5_5_3que.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_180252.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_5_5_3que/run_5_5_3que_sync.mp4'
+        start = 0
+        treadmill_vel = 5.5
+        plate = 1
+
+    elif trial == 'Running 5.5 m/s, Ring Pits': 
+        filepath_marker = f'Collection {session_date}/Session_3/{session_id}/MarkerData/run_5_5ringpits.trc'
+        filepath_kin = f'Collection {session_date}/Session_3/{session_id}/OpenSimData/Kinematics/run_5_5ringpits.mot'
+        filepath_FP = f'Collection {session_date}/Session_3/Session_3_forces_2025_03_07_175618.csv'
+        video = f'Collection {session_date}/Session_3/{session_id}/Videos/Cam0/InputMedia/run_5_5ringpits/run_5_5ringpits_sync.mp4'
+        start = 0
+        treadmill_vel = 5.5
+        plate = 1
 
 df_marker = read_and_adjust_trc(filepath_marker)
 df_marker = df_marker[start:].reset_index(drop=True)
@@ -215,11 +281,6 @@ treadmill_force[f'{plate}:FX'] = lowpass(treadmill_force[f'{plate}:FX'],50,1000)
 
 stride_onset = np.where(treadmill_force[f'{plate}:FZ']<0)[0][0]
 treadmill_force = treadmill_force.iloc[stride_onset:,:].reset_index(drop=True)
-_='''
-start, end = st.slider("Select a range of values", 0, len(treadmill_force), (0, len(treadmill_force)))
-treadmill_force = treadmill_force[start:end].reset_index(drop=True)
-'''
-
 
 _='''
 
@@ -229,12 +290,11 @@ Working on Brushing the data using matplot lib
 
 '''
 
-from streamlit_plotly_events import plotly_events
-
+df_downsampled = treadmill_force.iloc[::10].reset_index(drop=True)
 crop_fig = go.Figure()
 crop_fig.add_scatter(
-    x=treadmill_force["Time (s)"],
-    y=treadmill_force["1:FZ"],
+    x=df_downsampled["Time (s)"],
+    y=df_downsampled["1:FZ"],
     mode = 'markers+lines',
     marker=dict(size=1), 
     name="Vertical Force Data"
@@ -260,8 +320,11 @@ selected_points = plotly_events(
 if selected_points:
     # Extract the x-values of the selected points
     selected_x_vals = [pt["x"] for pt in selected_points]
-    df_selected = treadmill_force[treadmill_force["Time (s)"].isin(selected_x_vals)]
+    crop_start = np.where(treadmill_force["Time (s)"] == selected_x_vals[0])[0][0]
+    crop_end = np.where(treadmill_force["Time (s)"] == selected_x_vals[-1])[0][0]
     
+    #df_selected = treadmill_force[treadmill_force["Time (s)"].isin(selected_x_vals)]
+    df_selected = treadmill_force[crop_start:crop_end]
     treadmill_force = df_selected.reset_index(drop=True)
     
 else:
