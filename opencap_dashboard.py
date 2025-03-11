@@ -107,6 +107,7 @@ st.set_page_config(layout="wide")
 
 st.image('https://www.csipacific.ca/wp-content/uploads/2023/10/logo-Performance-Nation-vertical-lg.png', width = 150)
 st.title("Biomechanical Running Analysis")
+st.write('Changes made')
 
 session_date = st.sidebar.selectbox('Select Date', ['Feb 21', 'Feb 28', 'March 7'])
 
@@ -293,8 +294,8 @@ Working on Brushing the data using matplot lib
 df_downsampled = treadmill_force.iloc[::10].reset_index(drop=True)
 crop_fig = go.Figure()
 crop_fig.add_scatter(
-    x=df_downsampled["Time (s)"],
-    y=df_downsampled["1:FZ"],
+    x=np.array(df_downsampled["Time (s)"]),
+    y=np.array(df_downsampled["1:FZ"]),
     mode = 'markers+lines',
     marker=dict(size=1), 
     name="Vertical Force Data"
